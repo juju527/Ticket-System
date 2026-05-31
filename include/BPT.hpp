@@ -1,12 +1,14 @@
-#include <cassert>
+#ifndef BPT_HPP
+#define BPT_HPP
 #include <cmath>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include "vector.hpp"
 
-typedef unsigned long long ull;
+#include"MemoryRiver.hpp"
 
 using std::cin;
 using std::cout;
@@ -15,127 +17,8 @@ using std::fstream;
 using std::ifstream;
 using std::ofstream;
 using std::string;
-template <class T, int info_len = 2> class MemoryRiver {
-  private:
-    fstream file;
-    string file_name;
-    int sizeofT = sizeof(T);
-    static_assert(sizeof(T) >= sizeof(int));
+using sjtu::vector;
 
-  public:
-    MemoryRiver() = default;
-
-    MemoryRiver(const string &file_name) : file_name(file_name) {}
-    void open() {
-        file.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
-        return;
-    }
-    void close() {
-        file.close();
-        return;
-    }
-    void initialise(string FN = "") {
-        if (FN != "")
-            file_name = FN;
-        if (std::filesystem::exists(file_name))
-            return;
-        file.open(file_name, std::ios::out | std::ios::binary);
-        int tmp = 0;
-        for (int i = 0; i < info_len; ++i) {
-            file.seekp(i * sizeof(int), std::ios::beg);
-            file.write(reinterpret_cast<char *>(&tmp), sizeof(int));
-        }
-        file.close();
-        return;
-    }
-
-    void get_info(int &tmp, int n) {
-        if (n > info_len)
-            return;
-        file.seekg((n - 1) * sizeof(int), std::ios::beg);
-        file.read(reinterpret_cast<char *>(&tmp), sizeof(int));
-        return;
-    }
-
-    void write_info(int tmp, int n) {
-        if (n > info_len)
-            return;
-        file.seekp((n - 1) * sizeof(int), std::ios::beg);
-        file.write(reinterpret_cast<char *>(&tmp), sizeof(int));
-        return;
-    }
-
-    int write(T &t) {
-        int head = 0;
-        get_info(head, 1);
-        int index = 0;
-        if (head) {
-            index = head, file.seekg(head, std::ios::beg);
-            int nxt = 0;
-            file.read(reinterpret_cast<char *>(&nxt), sizeof(int));
-            write_info(nxt, 1);
-            file.seekp(index, std::ios::beg);
-        } else {
-            file.seekp(0, std::ios::end);
-            index = static_cast<int>(file.tellp());
-        }
-        file.write(reinterpret_cast<char *>(&t), sizeofT);
-        return index;
-    }
-
-    void update(T &t, const int index) {
-        file.seekp(index, std::ios::beg);
-        file.write(reinterpret_cast<char *>(&t), sizeofT);
-        return;
-    }
-
-    void read(T &t, const int index) {
-        file.seekg(index, std::ios::beg);
-        file.read(reinterpret_cast<char *>(&t), sizeofT);
-        return;
-    }
-
-    void Delete(int index) {
-        if (index <= 0)
-            return;
-        int head = 0;
-        get_info(head, 1);
-        file.seekp(index, std::ios::beg),
-            file.write(reinterpret_cast<char *>(&head), sizeof(int));
-        write_info(index, 1);
-        return;
-    }
-
-    void readorder(T &t, const int id) {
-        file.seekg(info_len * sizeof(int) + (id - 1) * sizeofT);
-        file.read(reinterpret_cast<char *>(&t), sizeofT);
-        return;
-    }
-
-    void writeorder(T t, const int id) {
-        int num = 0;
-        get_info(num, 1);
-        if (num >= id)
-            file.seekp(info_len * sizeof(int) + (id - 1) * sizeofT);
-        else {
-            write_info(num + 1, 1);
-            file.seekp(0, std::ios::end), file.tellp();
-        }
-        file.write(reinterpret_cast<char *>(&t), sizeofT);
-        return;
-    }
-
-    /*vector<T> query() {
-        int len;
-        open();
-        get_info(len, 1);
-        vector<T> ans(len);
-        for (int i = 0; i < len; i++)
-            read(ans[i], info_len * sizeof(int) + i * sizeofT);
-        close();
-        return ans;
-    }*/
-};
 template <class Key, class Val, int M> // 至多 M-1 个儿子
 class BPT {
   private:
@@ -164,7 +47,7 @@ class BPT {
         }
     };
     struct node {
-        size_t siz; // 目前儿子数量，保证 siz 在 M/2 到 2M-1 之间
+        size_t siz; // 目前儿子数量，保证 siz 在 M/2 到 M-1 之间
         info arr[M];
         int son[M];   // 至多 M-1 个儿子在 bpt 文件中的位置
         int pre, nxt; // 叶节点链表
@@ -187,9 +70,9 @@ class BPT {
     int tot;  // 结点总数
     int root; // 根结点位置
     int D;    // 总深度
-    int id[105], to[105];
-    bool upd[105];
-    node buf[105];
+    int id[15], to[15];
+    bool upd[15];
+    node buf[15];
 
   public:
     BPT(string name) {
@@ -203,6 +86,13 @@ class BPT {
         bpt.write_info(D, 3);
         bpt.close();
     }
+
+    void clear(){
+        root=0,D=0;
+        return ;
+    }
+
+    bool empty(){return root==0;}
 
   private:
     void _insert(int d, int y, info &w) {
@@ -463,11 +353,9 @@ class BPT {
         return;
     }
 
-    void find(Key key) {
-        if (!root) {
-            cout << "null" << endl;
-            return;
-        }
+    vector<Val> find(Key key) {
+        vector<Key> res(0);
+        if (!root)return res;
         node cur;
         bpt.readorder(cur, root);
         int tmp = root;
@@ -478,10 +366,8 @@ class BPT {
                     pos = j;
                     break;
                 }
-            if (pos == cur.siz) {
-                cout << "null" << endl;
-                return;
-            }
+            if (pos == cur.siz)
+                return res;
             tmp = cur.son[pos];
             bpt.readorder(cur, tmp);
         }
@@ -489,7 +375,7 @@ class BPT {
         while (!ed) {
             for (int i = 0; i < cur.siz; i++) {
                 if (key == cur.arr[i].key)
-                    tag = 1, cout << cur.arr[i].val << " ";
+                    tag = 1, res.push_back(cur.arr[i].val);
                 else if (key < cur.arr[i].key) {
                     ed = 1;
                     break;
@@ -502,38 +388,7 @@ class BPT {
                     bpt.readorder(cur, cur.nxt);
             }
         }
-        if (!tag)
-            cout << "null";
-        cout << endl;
-        return;
+        return res;
     }
 };
-const int bs = 2333;
-const int mod1 = 998244353, mod2 = 1e9 + 7;
-ull Hash(string st) {
-    int res1 = 0, res2 = 0;
-    for (int i = 0; i < st.size(); i++)
-        res1 = (1ll * res1 * bs + st[i] + 256) % mod1,
-        res2 = (1ll * res2 * bs + st[i] + 256) % mod2;
-    return 1ll * res1 * mod2 + res2;
-}
-int main() {
-    std::ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    cout.tie(nullptr);
-    BPT<ull, int, 210> t("BPT");
-    int n;
-    cin >> n;
-    while (n--) {
-        string op, index;
-        int value;
-        cin >> op;
-        if (op == "insert")
-            cin >> index >> value, t.ins(Hash(index), value);
-        else if (op == "delete")
-            cin >> index >> value, t.del(Hash(index), value);
-        else
-            cin >> index, t.find(Hash(index));
-    }
-    return 0;
-}
+#endif
