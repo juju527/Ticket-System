@@ -39,4 +39,20 @@ string date_to_str(Date date){
     st+=(char)('0'+d/10);st+=(char)('0'+d%10);
     return st;
 }
+string date_time_to_str(Date date,Time time){
+    return date_to_str(date)+" "+time_to_str(time);
+}
+
+Date date_calc(Date date,Time time,int delta){
+    return date+(time+delta)/1440;
+}
+Time time_calc(Date date,Time time,int delta){
+    return (time+delta)%1440;
+}
+
+string date_time_calc(Date date,Time time,int delta){
+    date+=(time+delta)/1440;
+    time=(time+delta)%1440;
+    return date_to_str(date)+" "+time_to_str(time);
+}
 #endif

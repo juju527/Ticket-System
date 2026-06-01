@@ -3,6 +3,8 @@
 using std::cout;
 using std::endl;
 
+// User 实现
+
 User::User(Username username,Password password,Name name,MailAddress mailaddress,int privilege){
     this->username=username;
     this->password=password;
@@ -12,6 +14,7 @@ User::User(Username username,Password password,Name name,MailAddress mailaddress
 }
 
 User& User::operator=(const User& other){
+    if(this==(&other))return *this;
     username=other.username;
     password=other.password;
     name=other.name;
@@ -26,6 +29,8 @@ bool User::operator <(const User& other)const{
 bool User::operator ==(const User& other)const{
     return username==other.username;
 }
+
+// UserManager 实现
 
 UserManager::UserManager(BPT<Username,User,100>* bpt1,BPT<Username,bool,100>*bpt2){
     this->bpt1=bpt1;this->bpt2=bpt2;

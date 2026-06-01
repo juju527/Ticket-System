@@ -4,7 +4,7 @@
 #include "Time.hpp"
 #include "BPT.hpp"
 
-constexpr int maxStationNum=105;
+constexpr int maxStationNum=35;
 using TrainID=String<20>;
 using Station=String<30>;
 
@@ -14,12 +14,13 @@ public:
     int stationNum;
     Station stations[maxStationNum];
     int seatNum;
-    int prices[maxStationNum];
+    int prices[maxStationNum];//前缀和
     Time startTime;
-    int travelTimes[maxStationNum];
-    int stopoverTimes[maxStationNum];
+    int travelTimes[maxStationNum];//前缀和
+    int stopoverTimes[maxStationNum];//前缀和
     Date sales,salet;
     char type;
+    Train()=default;
     Train(TrainID, int, Station[maxStationNum], int, int[maxStationNum], Time, int[maxStationNum], int[maxStationNum], Date, Date, char);
     Train& operator=(const Train&);
     bool operator <(const Train&)const;
@@ -33,6 +34,7 @@ public:
     Train train;
     int datelen;
     int seat[maxDate][maxStationNum];
+    Tickets()=default;
     Tickets(const Train&);
     Tickets(const Tickets&);
     Tickets& operator=(const Tickets&);
