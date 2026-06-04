@@ -18,6 +18,7 @@ mem1[Tickets]：储存了发布的火车的售票情况。
 bpt4[TrainID,int]：储存了发布的火车对应的 mem1 编号。
 bpt5[pair[Station,Station],int]：储存了能从 s 到 t 的发布了的火车的 mem1 编号。
 bpt6[Station,int]：储存了包含 s 的发布了的火车 mem1 编号。
+bpt[Station,info]：处理 query_transfer 中转的 bpt，info 里有时间、花费等信息。
 
 ### Order
 

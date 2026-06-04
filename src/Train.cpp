@@ -77,12 +77,13 @@ bool Tickets::operator ==(const Tickets& other){
 
 //TrainManager 实现
 
-TrainManager::TrainManager(BPT<TrainID,Train,50> *bpt3,MemoryRiver<Tickets,1> *mem1,BPT<TrainID,int,100> *bpt4,BPT<pair<Station,Station>,int,100> *bpt5,BPT<Station,int,100> *bpt6){
+TrainManager::TrainManager(BPT<TrainID,Train,50> *bpt3,MemoryRiver<Tickets,1> *mem1,BPT<TrainID,int,100> *bpt4,BPT<pair<Station,Station>,int,100> *bpt5,BPT<Station,int,100> *bpt6,BPT<Station,Info2,100> *bpt){
     this->bpt3=bpt3;
     this->mem1=mem1;
     this->bpt4=bpt4;
     this->bpt5=bpt5;
     this->bpt6=bpt6;
+    this->bpt=bpt;
 }
 void TrainManager::clear(){
     this->bpt3->clear();
@@ -268,36 +269,106 @@ void TrainManager::query_tickets(Station s, Station t, Date date, bool op){
     return ;
 }
 
+Info2::Info2(Date _date,Time _time,int _t,int _c,int _seat,TrainID _trainID){
+    this->date=_date;
+    this->time=_time;
+    this->t=_t;
+    this->c=_c;
+    this->seat=_seat;
+    this->trainID=_trainID;
+}
+
+struct Info3{
+    int time,cost;
+    Station transfer;
+    TrainID trainID1,trainID2;
+    Info3(int _t,int _c,Station _trans=Station(),TrainID t1=TrainID(),TrainID t2=TrainID()){
+        time=_t,cost=_c;transfer=_trans;
+        trainID1=t1,trainID2=t2;
+    }
+};
+bool Cmp0(const Info3 &i,const Info3 &j){
+    if(i.time!=j.time)return i.time<j.time;
+    if(i.cost!=j.cost)return i.cost<j.cost;
+    if(!(i.trainID1==j.trainID1))return i.trainID1<j.trainID1;
+    return i.trainID2<j.trainID2;
+}
+bool Cmp1(const Info3 &i,const Info3 &j){
+    if(i.cost!=j.cost)return i.cost<j.cost;
+    if(i.time!=j.time)return i.time<j.time;
+    if(!(i.trainID1==j.trainID1))return i.trainID1<j.trainID1;
+    return i.trainID2<j.trainID2;
+}
+
 void TrainManager::query_transfer(Station s, Station t, Date date, bool op){
     vector<int> A=bpt6->find(s),B=bpt6->find(t);
-    vector<Tickets> t1,t2;
+    bpt->clear();
     for(int i=0;i<A.size();i++){
         Tickets tickets;
         mem1->readorder(tickets,A[i]);
-        t1.push_back(tickets);
+        Train train1=tickets.train;
+        Date sd;
+        Time st;
+        int l,d0;
+        for(int j=0;j<train1.stationNum;j++)
+            if(train1.stations[j]==s){
+                int delta=train1.travelTimes[j]+train1.stopoverTimes[j];
+                sd=date_calc(train1.sales,train1.startTime,delta);
+                st=time_calc(train1.sales,train1.startTime,delta);
+                d0=delta;l=j;
+                break;
+            }
+        if(sd>date||sd+train1.salet-train1.sales<date)continue;
+        int p=date-sd,seat=tickets.seat[p][l];
+        for(int j=l+1;j<train1.stationNum;j++){
+            int delta=train1.travelTimes[j]+train1.stopoverTimes[j-1];
+            int cost=train1.prices[j]-train1.prices[l];
+            Date d=date_calc(train1.sales,train1.startTime,delta);
+            Time t=time_calc(train1.sales,train1.startTime,delta);
+            Info2 info(d,t,delta-d0,cost,seat,train1.trainID);
+            bpt->ins(train1.stations[j],info);
+            seat=std::min(seat,tickets.seat[p][j]);
+        }
     }
+    Info3 res((int)1e9,(int)1e9);
     for(int i=0;i<B.size();i++){
         Tickets tickets;
         mem1->readorder(tickets,B[i]);
-        t2.push_back(tickets);
-    }
-    for(int i=0;i<A.size();i++){
-        Train train1=t1[i].train;
-        Date sd,td;
-        Time st,tt;
-        int l,lt;
-        for(int k=0;k<train1.stationNum;k++)
-            if(train1.stations[k]==s){
-                int delta=train1.travelTimes[k]+train1.stopoverTimes[k];
-                sd=date_calc(train1.sales,train1.startTime,delta);
-                st=time_calc(train1.sales,train1.startTime,delta);
-                l=k;
+        Train train2=tickets.train;
+        int r,arrivet;
+        for(int j=0;j<train2.stationNum;j++)
+            if(train2.stations[j]==t){
+                arrivet=train2.travelTimes[j]+train2.stopoverTimes[j-1];
+                r=j;
+                break;
             }
-        if(sd>date||sd+train1.salet-train1.sales<date)continue;
-        int p=date-sd;
-        for(int j=0;j<B.size();j++){
-            
+        for(int j=r-1;j>=0;j--){
+            int delta=train2.travelTimes[j]+train2.stopoverTimes[j];
+            Date td=date_calc(train2.sales,train2.startTime,delta);
+            Time tt=time_calc(train2.sales,train2.startTime,delta);
+            vector<Info2> aux=bpt->find(train2.stations[j]);
+            for(auto info:aux){
+                if(info.trainID==train2.trainID)continue;
+                if(td+train2.salet-train2.sales<info.date)continue;
+                if(td+train2.salet-train2.sales==info.date&&tt<info.time)continue;//= 如何？
+                Date Td=td;Time Tt=tt;
+                if(td<=info.date){
+                    if(tt<info.time)Td=info.date+1;
+                    else Td=info.date;
+                }
+                int t0=info.t+calc_interval(info.date,info.time,Td,Tt)+arrivet-delta;
+                int c0=info.c+train2.prices[r]-train2.prices[j];
+                Info3 cur(t0,c0,train2.stations[j],info.trainID,train2.trainID);
+                if(!op){
+                    if(Cmp0(cur,res))res=cur;
+                }
+                else{
+                    if(Cmp1(cur,res))res=cur;
+                }
+            }
         }
     }
+    if(res.time==(int)1e9){cout<<0<<endl;return ;}
+    //cout<<res.trainID1<<" "<<s<<" "<<
     return ;
 }

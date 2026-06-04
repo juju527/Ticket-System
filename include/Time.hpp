@@ -55,4 +55,8 @@ string date_time_calc(Date date,Time time,int delta){
     time=(time+delta)%1440;
     return date_to_str(date)+" "+time_to_str(time);
 }
+
+int calc_interval(Date d1,Time t1,Date d2,Time t2){
+    return (d2-d1)*1440+t2-t1;
+}
 #endif

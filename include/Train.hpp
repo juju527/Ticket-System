@@ -42,6 +42,13 @@ public:
     bool operator ==(const Tickets&);
 };
 
+struct Info2{
+    Date date;
+    Time time;
+    int t,c,seat;
+    TrainID trainID;
+    Info2(Date,Time,int,int,int,TrainID);
+};
 
 class TrainManager{
 private:
@@ -50,8 +57,9 @@ private:
     BPT<TrainID,int,100> *bpt4;// 所有发布火车的 mem1 id
     BPT<pair<Station,Station>,int,100> *bpt5;// 包含站 (s,t) 的火车 mem1 id
     BPT<Station,int,100> *bpt6;// 包含站 s 的火车 mem id
+    BPT<Station,Info2,100> *bpt;
 public:
-    TrainManager(BPT<TrainID,Train,50>*,MemoryRiver<Tickets,1>*,BPT<TrainID,int,100>*,BPT<pair<Station,Station>,int,100>*,BPT<Station,int,100>*);
+    TrainManager(BPT<TrainID,Train,50>*,MemoryRiver<Tickets,1>*,BPT<TrainID,int,100>*,BPT<pair<Station,Station>,int,100>*,BPT<Station,int,100>*,BPT<Station,Info2,100>*);
     void clear();
     void add_train(TrainID, int, int, string, string, Time, string, string, Date, Date, char);
     void delete_train(TrainID);
