@@ -19,7 +19,7 @@ public:
     Time leavingTime, arrivingTime;
     int price;
     int num;
-    Order(Status, TrainID, Station, Station, Date, Date, Date, Time, Time, int, int);
+    Order(Status, TrainID, Station, Station, Date, Date, Time, Date, Time, int, int);
     bool operator <(const Order&)const;
     bool operator ==(const Order&)const;
 };
