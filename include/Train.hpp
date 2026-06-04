@@ -43,11 +43,11 @@ public:
 };
 
 struct Info2{
-    Date date;
-    Time time;
+    Date Ld,Ad;
+    Time Lt,At;
     int t,c,seat;
     TrainID trainID;
-    Info2(Date,Time,int,int,int,TrainID);
+    Info2(Date,Time,Date,Time,int,int,int,TrainID);
 };
 
 class TrainManager{

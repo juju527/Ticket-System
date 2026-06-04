@@ -269,9 +269,11 @@ void TrainManager::query_tickets(Station s, Station t, Date date, bool op){
     return ;
 }
 
-Info2::Info2(Date _date,Time _time,int _t,int _c,int _seat,TrainID _trainID){
-    this->date=_date;
-    this->time=_time;
+Info2::Info2(Date _Ld,Time _Lt,Date _Ad,Time _At,int _t,int _c,int _seat,TrainID _trainID){
+    this->Ld=_Ld;
+    this->Lt=_Lt;
+    this->Ad=_Ad;
+    this->At=_At;
     this->t=_t;
     this->c=_c;
     this->seat=_seat;
@@ -280,11 +282,23 @@ Info2::Info2(Date _date,Time _time,int _t,int _c,int _seat,TrainID _trainID){
 
 struct Info3{
     int time,cost;
-    Station transfer;
     TrainID trainID1,trainID2;
-    Info3(int _t,int _c,Station _trans=Station(),TrainID t1=TrainID(),TrainID t2=TrainID()){
-        time=_t,cost=_c;transfer=_trans;
+    Station transfer;
+    Date Ld1,Ad1,Ld2,Ad2;
+    Time Lt1,At1,Lt2,At2;
+    int price1,price2;
+    int seat1,seat2;
+    Info3(int _t,int _c){
+        time=_t,cost=_c;
+    }
+    Info3(int _t,int _c,TrainID t1,TrainID t2,Station _transfer,Date _Ld1,Time _Lt1,Date _Ad1,Time _At1,Date _Ld2,Time _Lt2,Date _Ad2,Time _At2,int p1,int p2,int s1,int s2){
+        time=_t,cost=_c;
         trainID1=t1,trainID2=t2;
+        transfer=_transfer;
+        Ld1=_Ld1,Lt1=_Lt1;Ad1=_Ad1,At1=_At1;
+        Ld2=_Ld2,Lt2=_Lt2;Ad2=_Ad2,At2=_At2;
+        price1=p1,price2=p2;
+        seat1=s1,seat2=s2;
     }
 };
 bool Cmp0(const Info3 &i,const Info3 &j){
@@ -325,7 +339,7 @@ void TrainManager::query_transfer(Station s, Station t, Date date, bool op){
             int cost=train1.prices[j]-train1.prices[l];
             Date d=date_calc(train1.sales,train1.startTime,delta);
             Time t=time_calc(train1.sales,train1.startTime,delta);
-            Info2 info(d,t,delta-d0,cost,seat,train1.trainID);
+            Info2 info(date,st,d,t,delta-d0,cost,seat,train1.trainID);
             bpt->ins(train1.stations[j],info);
             seat=std::min(seat,tickets.seat[p][j]);
         }
@@ -349,16 +363,18 @@ void TrainManager::query_transfer(Station s, Station t, Date date, bool op){
             vector<Info2> aux=bpt->find(train2.stations[j]);
             for(auto info:aux){
                 if(info.trainID==train2.trainID)continue;
-                if(td+train2.salet-train2.sales<info.date)continue;
-                if(td+train2.salet-train2.sales==info.date&&tt<info.time)continue;//= 如何？
+                if(td+train2.salet-train2.sales<info.Ad)continue;
+                if(td+train2.salet-train2.sales==info.Ad&&tt<info.At)continue;//= 如何？
                 Date Td=td;Time Tt=tt;
-                if(td<=info.date){
-                    if(tt<info.time)Td=info.date+1;
-                    else Td=info.date;
+                if(td<=info.Ad){
+                    if(tt<info.Ad)Td=info.Ad+1;
+                    else Td=info.Ad;
                 }
-                int t0=info.t+calc_interval(info.date,info.time,Td,Tt)+arrivet-delta;
+                int t0=info.t+calc_interval(info.Ad,info.At,Td,Tt)+arrivet-delta;
                 int c0=info.c+train2.prices[r]-train2.prices[j];
-                Info3 cur(t0,c0,train2.stations[j],info.trainID,train2.trainID);
+                int seat=1e9;
+                for(int k=j;k<r;k++)seat=std::min(seat,tickets.seat[Td-td][k]);
+                Info3 cur(t0,c0,info.trainID,train2.trainID,train2.stations[j],info.Ld,info.Lt,info.Ad,info.At,Td,Tt,date_calc(Td,Tt,arrivet-delta),time_calc(Td,Tt,arrivet-delta),info.c,train2.prices[r]-train2.prices[j],info.seat,seat);
                 if(!op){
                     if(Cmp0(cur,res))res=cur;
                 }
@@ -369,6 +385,7 @@ void TrainManager::query_transfer(Station s, Station t, Date date, bool op){
         }
     }
     if(res.time==(int)1e9){cout<<0<<endl;return ;}
-    //cout<<res.trainID1<<" "<<s<<" "<<
+    cout<<res.trainID1<<" "<<s<<" "<<date_time_to_str(res.Ld1,res.Lt1)<<" -> "<<res.transfer<<" "<<date_time_to_str(res.Ad1,res.At1)<<" "<<res.price1<<" "<<res.seat1<<endl;
+    cout<<res.trainID1<<" "<<res.transfer<<" "<<date_time_to_str(res.Ld2,res.Lt2)<<" -> "<<t<<" "<<date_time_to_str(res.Ad2,res.At2)<<" "<<res.price2<<" "<<res.seat2<<endl;
     return ;
 }
