@@ -45,9 +45,9 @@ template <class T, int info_len = 2> class MemoryRiver {
     }
     void clear(){
         file.close();
-        file.open(file_name ,ios::out | ios::trunc);
+        file.open(file_name ,std::ios::out | std::ios::trunc);
         file.close();
-        file.open(file_name, std::ios::out | std::ios::binary);
+        open();
         int tmp = 0;
         for (int i = 0; i < info_len; ++i) {
             file.seekp(i * sizeof(int), std::ios::beg);

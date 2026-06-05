@@ -37,6 +37,7 @@ UserManager::UserManager(BPT<Username,User,100>* bpt1,BPT<Username,bool,100>*bpt
 }
 UserManager::~UserManager(){
     this->bpt2->clear();
+    std::cerr<<"!!!!"<<endl;
 }
 void UserManager::clear(){
     bpt1->clear();
@@ -69,33 +70,33 @@ void UserManager::login(Username username, Password password){
         return ;
     }
     User user=tmp[0];
-    if(user.password==password)bpt2->ins(username,1),cout<<0<<endl;
+    if(user.password==password)bpt2->ins(username,true),cout<<0<<endl;
     else cout<<-1<<endl;
     return ;
 }
 
 void UserManager::logout(Username username){
-    if(bpt2->find(username).size())bpt2->del(username,1),cout<<0<<endl;
+    if(bpt2->find(username).size())bpt2->del(username,true),cout<<0<<endl;
     else cout<<-1<<endl;
     return ;
 }
 
 void UserManager::query_profile(Username cur, Username username){
-    if(!bpt2->find(cur).size()){cout<<-1;return ;}
+    if(!bpt2->find(cur).size()){cout<<-1<<endl;return ;}
     vector<User> tmp=bpt1->find(username);
-    if(!tmp.size()){cout<<-1;return ;}
+    if(!tmp.size()){cout<<-1<<endl;return ;}
     User c=bpt1->find(cur)[0],u=tmp[0];
-    if(c.privilege<u.privilege){cout<<-1<<endl;return ;}
+    if(c.privilege<u.privilege||c.privilege==u.privilege&&!(cur==username)){cout<<-1<<endl;return ;}
     cout<<u.username<<" "<<u.name<<" "<<u.mailaddress<<" "<<u.privilege<<endl;
     return ;
 }
 
 void UserManager::modify_profile(Username cur, Username username,string st){
-    if(!bpt2->find(cur).size()){cout<<-1;return ;}
+    if(!bpt2->find(cur).size()){cout<<-1<<endl;return ;}
     vector<User> tmp=bpt1->find(username);
-    if(!tmp.size()){cout<<-1;return ;}
+    if(!tmp.size()){cout<<-1<<endl;return ;}
     User c=bpt1->find(cur)[0],u=tmp[0];
-    if(c.privilege<u.privilege){cout<<-1<<endl;return ;}
+    if(c.privilege<u.privilege||(c.privilege==u.privilege&&!(cur==username))){cout<<-1<<endl;return ;}
     vector<string> str=Parse(st);
     User buf=u;
     bool tag=0;

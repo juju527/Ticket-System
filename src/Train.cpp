@@ -108,20 +108,20 @@ void TrainManager::add_train(TrainID trainID, int stationNum, int seatNum, strin
     if(aux.size())_stations[j++]=aux;
     aux="",j=1,sum=0;
     for(int i=0;i<prices.size();i++){
-        if(prices[i]='|')_prices[j++]=(sum+=str_to_int(aux)),aux="";
+        if(prices[i]=='|')_prices[j++]=(sum+=str_to_int(aux)),aux="";
         else aux+=prices[i];
     }
     if(aux.size())_prices[j++]=(sum+=str_to_int(aux));
 
     aux="",j=1,sum=0;
     for(int i=0;i<travelTimes.size();i++){
-        if(travelTimes[i]='|')_travelTimes[j++]=(sum+=str_to_int(aux)),aux="";
+        if(travelTimes[i]=='|')_travelTimes[j++]=(sum+=str_to_int(aux)),aux="";
         else aux+=travelTimes[i];
     }
     if(aux.size())_travelTimes[j++]=(sum+=str_to_int(aux));
     aux="",j=1,sum=0;
     for(int i=0;i<stopoverTimes.size();i++){
-        if(stopoverTimes[i]='|')_stopoverTimes[j++]=(sum+=str_to_int(aux)),aux="";
+        if(stopoverTimes[i]=='|')_stopoverTimes[j++]=(sum+=str_to_int(aux)),aux="";
         else aux+=stopoverTimes[i];
     }
     if(aux.size())_stopoverTimes[j++]=(sum+=str_to_int(aux));
@@ -201,15 +201,17 @@ struct Info1{
 };
 
 class cmp0{
-    bool operator()(Info1 i,Info1 j)const{
-        if(i.time==j.time)return i.trainID<j.trainID;
-        return i.time<j.time;
+public:
+    bool operator()(const Info1 &i,const Info1 &j)const{
+        if(i.time==j.time)return j.trainID<i.trainID;
+        return j.time<i.time;
     }
 };
 class cmp1{
-    bool operator()(Info1 i,Info1 j)const{
-        if(i.price==j.price)return i.trainID<j.trainID;
-        return i.price<j.price;
+public:
+    bool operator()(const Info1 &i,const Info1 &j)const{
+        if(i.price==j.price)return j.trainID<i.trainID;
+        return j.price<i.price;
     }
 };
 
@@ -318,10 +320,12 @@ bool Cmp1(const Info3 &i,const Info3 &j){
 void TrainManager::query_transfer(Station s, Station t, Date date, bool op){
     vector<int> A=bpt6->find(s),B=bpt6->find(t);
     bpt->clear();
+//    std::cerr<<A.size()<<" "<<B.size()<<endl;
     for(int i=0;i<A.size();i++){
         Tickets tickets;
         mem1->readorder(tickets,A[i]);
         Train train1=tickets.train;
+//        std::cerr<<train1.trainID<<endl;
         Date sd;
         Time st;
         int l,d0;
@@ -340,9 +344,11 @@ void TrainManager::query_transfer(Station s, Station t, Date date, bool op){
             int cost=train1.prices[j]-train1.prices[l];
             Date d=date_calc(train1.sales,train1.startTime,delta);
             Time t=time_calc(train1.sales,train1.startTime,delta);
-            Info2 info(date,st,d,t,delta-d0,cost,seat,train1.trainID);
+            Info2 info(date,st,d+p,t,delta-d0,cost,seat,train1.trainID);
             bpt->ins(train1.stations[j],info);
             seat=std::min(seat,tickets.seat[p][j]);
+//            string st="北京市";
+//            if(train1.stations[j]==st)std::cerr<<"nice!"<<endl;
         }
     }
     Info3 res((int)1e9,(int)1e9);
@@ -350,10 +356,11 @@ void TrainManager::query_transfer(Station s, Station t, Date date, bool op){
         Tickets tickets;
         mem1->readorder(tickets,B[i]);
         Train train2=tickets.train;
+//        std::cerr<<train2.trainID<<endl;
         int r,arrivet;
         for(int j=0;j<train2.stationNum;j++)
             if(train2.stations[j]==t){
-                arrivet=train2.travelTimes[j]+train2.stopoverTimes[j-1];
+                if(j)arrivet=train2.travelTimes[j]+train2.stopoverTimes[j-1];
                 r=j;
                 break;
             }
@@ -362,13 +369,15 @@ void TrainManager::query_transfer(Station s, Station t, Date date, bool op){
             Date td=date_calc(train2.sales,train2.startTime,delta);
             Time tt=time_calc(train2.sales,train2.startTime,delta);
             vector<Info2> aux=bpt->find(train2.stations[j]);
+//            string st="北京市";
+//            if(train2.stations[j]==st)std::cerr<<aux.size()<<endl;
             for(auto info:aux){
                 if(info.trainID==train2.trainID)continue;
                 if(td+train2.salet-train2.sales<info.Ad)continue;
                 if(td+train2.salet-train2.sales==info.Ad&&tt<info.At)continue;//= 如何？
                 Date Td=td;Time Tt=tt;
                 if(td<=info.Ad){
-                    if(tt<info.Ad)Td=info.Ad+1;
+                    if(tt<info.At)Td=info.Ad+1;
                     else Td=info.Ad;
                 }
                 int t0=info.t+calc_interval(info.Ad,info.At,Td,Tt)+arrivet-delta;
@@ -387,6 +396,6 @@ void TrainManager::query_transfer(Station s, Station t, Date date, bool op){
     }
     if(res.time==(int)1e9){cout<<0<<endl;return ;}
     cout<<res.trainID1<<" "<<s<<" "<<date_time_to_str(res.Ld1,res.Lt1)<<" -> "<<res.transfer<<" "<<date_time_to_str(res.Ad1,res.At1)<<" "<<res.price1<<" "<<res.seat1<<endl;
-    cout<<res.trainID1<<" "<<res.transfer<<" "<<date_time_to_str(res.Ld2,res.Lt2)<<" -> "<<t<<" "<<date_time_to_str(res.Ad2,res.At2)<<" "<<res.price2<<" "<<res.seat2<<endl;
+    cout<<res.trainID2<<" "<<res.transfer<<" "<<date_time_to_str(res.Ld2,res.Lt2)<<" -> "<<t<<" "<<date_time_to_str(res.Ad2,res.At2)<<" "<<res.price2<<" "<<res.seat2<<endl;
     return ;
 }

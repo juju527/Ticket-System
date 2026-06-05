@@ -20,7 +20,7 @@ public:
     }
     
     int getlen()const{return len;}
-    char operator[](int i)const{return s[i]}
+    char operator[](int i)const{return s[i];}
     
     bool operator <(const String& tmp)const{
         for(int i=0;i<len&&i<tmp.len;i++){
@@ -46,9 +46,10 @@ class pair{
 public:
     T1 first;
     T2 second;
-    Pair(const T1& f,const T2&s):first(f),second(s){}
+    pair()=default;
+    pair(const T1& f,const T2&s):first(f),second(s){}
     
-    Pair& operator =(const pair& other){
+    pair& operator =(const pair& other){
         first=other.first;
         second=other.second;
         return *this;
@@ -63,21 +64,26 @@ public:
     }
 };
 
-int str_to_int(string st){
-    int res=0;
-    for(int i=0;i<st.size();i++)res=res*10+st[i]-'0';
-    return res;
-}
+using Time=int;
+using Date=int;
 
-vector<string> Parse(string st){
-    vector<string> res;
-    string cur="";
-    for(int i=0;i<st.size();i++){
-        if(st[i]==' ')res.push_back(cur),cur="";
-        else cur+=st[i];
-    }
-    if(cur.size())res.push_back(cur);
-    return res;
-}
+Time str_to_time(string st);
+string time_to_str(Time time);
+
+
+Date str_to_date(string st);
+string date_to_str(Date date);
+string date_time_to_str(Date date,Time time);
+
+Date date_calc(Date date,Time time,int delta);
+Time time_calc(Date date,Time time,int delta);
+
+string date_time_calc(Date date,Time time,int delta);
+
+int calc_interval(Date d1,Time t1,Date d2,Time t2);
+
+int str_to_int(string);
+
+vector<string> Parse(string);
 
 #endif

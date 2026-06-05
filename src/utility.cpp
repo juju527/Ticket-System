@@ -1,10 +1,4 @@
-#ifndef TIME_HPP
-#define TIME_HPP
-#include<string>
-using std::string;
-
-using Time=int;
-using Date=int;
+#include "utility.hpp"
 
 Time str_to_time(string st){
     int h=(st[0]-'0')*10+st[1]-'0';
@@ -59,4 +53,20 @@ string date_time_calc(Date date,Time time,int delta){
 int calc_interval(Date d1,Time t1,Date d2,Time t2){
     return (d2-d1)*1440+t2-t1;
 }
-#endif
+
+int str_to_int(string st){
+    int res=0;
+    for(int i=0;i<st.size();i++)res=res*10+st[i]-'0';
+    return res;
+}
+
+vector<string> Parse(string st){
+    vector<string> res;
+    string cur="";
+    for(int i=0;i<st.size();i++){
+        if(st[i]==' ')res.push_back(cur),cur="";
+        else cur+=st[i];
+    }
+    if(cur.size())res.push_back(cur);
+    return res;
+}

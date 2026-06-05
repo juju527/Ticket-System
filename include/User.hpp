@@ -15,6 +15,7 @@ public:
     Name name;
     MailAddress mailaddress;
     int privilege;
+    User()=default;
     User(Username, Password, Name, MailAddress, int);
     User& operator=(const User&);
     bool operator <(const User&)const;

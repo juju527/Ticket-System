@@ -21,7 +21,7 @@ void OrderManager::buy_ticket(Username username, TrainID trainID, Date date, int
     Tickets tickets;
     mem1->readorder(tickets,aux[0]);
     Train train=tickets.train;
-    int l,r,p;
+    int l=-1,r=-1,p;
     Order od;
     od.trainID=trainID;
     od.s=s,od.t=t;
@@ -35,6 +35,7 @@ void OrderManager::buy_ticket(Username username, TrainID trainID, Date date, int
             od.leavingDate=date;od.leavingTime=st;
         }
         else if(train.stations[i]==t){
+            if(!i){cout<<-1<<endl;return ;}
             int delta=train.travelTimes[i]+train.stopoverTimes[i-1];
             Date td=date_calc(train.sales,train.startTime,delta);
             Time tt=time_calc(train.sales,train.startTime,delta);
@@ -42,10 +43,12 @@ void OrderManager::buy_ticket(Username username, TrainID trainID, Date date, int
             od.arrivingDate=td+p;od.arrivingTime=tt;
         }
     }
+    if(l==-1||r==-1||l>r){cout<<-1<<endl;return ;}
+//    std::cerr<<l<<" "<<r<<endl;
     int seat=1e9;
     for(int i=l;i<r;i++)seat=std::min(seat,tickets.seat[p][i]);
     if(seat>=num){
-        int cost=(train.prices[r]-train.prices[l])*num;
+        int cost=train.prices[r]-train.prices[l];
         for(int i=l;i<r;i++)tickets.seat[p][i]-=num;
         mem1->writeorder(tickets,aux[0]);
         od.price=cost;od.num=num;
@@ -54,18 +57,20 @@ void OrderManager::buy_ticket(Username username, TrainID trainID, Date date, int
         mem2->get_info(tot,1);
         mem2->writeorder(od,tot+1);
         bpt8->ins(username,tot+1);
-        cout<<cost<<endl;
+        cout<<cost*num<<endl;
     }
     else{
         if(!op){cout<<-1<<endl;return ;}
-        int cost=(train.prices[r]-train.prices[l])*num;
+        int cost=train.prices[r]-train.prices[l];
         od.price=cost;od.num=num;
         od.status=Status::pending;
         int tot;
         mem2->get_info(tot,1);
         mem2->writeorder(od,tot+1);
         bpt8->ins(username,tot+1);
-        bpt9->ins(pair(username,p),tot+1);
+        bpt9->ins(pair(trainID,p),tot+1);
+//        string S="LeavesofGrass";
+//        if(trainID==S&&p==0)std::cerr<<"+"<<l<<" "<<r<<" "<<num<<endl;
         cout<<"queue"<<endl;
     }
     return ;
@@ -107,6 +112,7 @@ void OrderManager::refund_ticket(Username username,int num){
     Train train=tickets.train;
     for(int i=od.l;i<od.r;i++)tickets.seat[od.d0][i]+=od.num;
     vector<int> tmp=bpt9->find(pair(od.trainID,od.d0));
+//    std::cerr<<tmp.size()<<endl;
     for(int i=0;i<tmp.size();i++){
         Order od1;
         mem2->readorder(od1,tmp[i]);
@@ -117,6 +123,8 @@ void OrderManager::refund_ticket(Username username,int num){
             od1.status=Status::success;
             mem2->writeorder(od1,tmp[i]);
             bpt9->del(pair(od.trainID,od.d0),tmp[i]);
+//            string S="LeavesofGrass";
+//            if(od1.trainID==S&&od1.d0==0)std::cerr<<"-"<<od1.l<<" "<<od1.r<<" "<<od1.num<<endl;
         }
     }
     mem1->writeorder(tickets,id);

@@ -25,7 +25,7 @@ class BPT {
     struct info {
         Key key;
         Val val;
-        info() {}
+        info()=default;
         info(Key _key, Val _val) : key(_key), val(_val) {}
         info &operator=(const info &other) {
             key = other.key;
@@ -33,14 +33,14 @@ class BPT {
             return *this;
         }
         bool operator<(const info &other) {
-            if (key != other.key)
+            if (!(key == other.key))
                 return key < other.key;
             return val < other.val;
         }
         bool operator<=(const info &other) {
-            if (key != other.key)
+            if (!(key == other.key))
                 return key < other.key;
-            return val <= other.val;
+            return !(other.val < val);
         }
         bool operator==(const info &other) {
             return key == other.key && val == other.val;
@@ -57,9 +57,9 @@ class BPT {
         }
         node &operator=(const node &other) {
             siz = other.siz;
-            for (int i = 0; i < M; i++)
+            for (int i = 0; i < siz; i++)
                 arr[i] = other.arr[i];
-            for (int i = 0; i < M; i++)
+            for (int i = 0; i < siz; i++)
                 son[i] = other.son[i];
             pre = other.pre;
             nxt = other.nxt;
@@ -208,8 +208,8 @@ class BPT {
             cur.arr[i] = cur.arr[i + 1], cur.son[i] = cur.son[i + 1];
         cur.siz--;
         upd[d] = 1;
-        info ww = cur.arr[cur.siz - 1];
-        if (pos == cur.siz) {
+        if (pos == cur.siz && d) {
+            info ww = cur.arr[cur.siz - 1];
             for (int i = d - 1; i >= 0; i--) {
                 node &aux = buf[i];
                 int idx = id[i], it = aux.siz;
@@ -355,7 +355,7 @@ class BPT {
     }
 
     vector<Val> find(Key key) {
-        vector<Key> res(0);
+        vector<Val> res;
         if (!root)return res;
         node cur;
         bpt.readorder(cur, root);
@@ -363,7 +363,7 @@ class BPT {
         for (int i = 0; i < D; i++) {
             int pos = cur.siz;
             for (int j = 0; j < cur.siz; j++)
-                if (key <= cur.arr[j].key) {
+                if (!(cur.arr[j].key < key)) {
                     pos = j;
                     break;
                 }

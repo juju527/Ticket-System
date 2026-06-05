@@ -1,7 +1,6 @@
 #ifndef TRAIN_HPP
 #define TRAIN_HPP
 #include "utility.hpp"
-#include "Time.hpp"
 #include "BPT.hpp"
 
 constexpr int maxStationNum=35;
@@ -20,7 +19,9 @@ public:
     int stopoverTimes[maxStationNum];//前缀和
     Date sales,salet;
     char type;
-    Train()=default;
+    Train(){
+        stationNum=0;
+    }
     Train(TrainID, int, Station[maxStationNum], int, int[maxStationNum], Time, int[maxStationNum], int[maxStationNum], Date, Date, char);
     Train& operator=(const Train&);
     bool operator <(const Train&)const;
@@ -47,7 +48,10 @@ struct Info2{
     Time Lt,At;
     int t,c,seat;
     TrainID trainID;
+    Info2()=default;
     Info2(Date,Time,Date,Time,int,int,int,TrainID);
+    bool operator <(const Info2& other)const{return trainID<other.trainID;}
+    bool operator ==(const Info2& other)const{return trainID==other.trainID;}
 };
 
 class TrainManager{

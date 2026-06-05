@@ -131,7 +131,7 @@ int main(){
             for(int i=2;i<v.size();i+=2){
                 if(v[i]=="-s")s=v[i+1];
                 else if(v[i]=="-t")t=v[i+1];
-                else if(v[i]=="-d")date=str_to_int(v[i+1]);
+                else if(v[i]=="-d")date=str_to_date(v[i+1]);
                 else if(v[i]=="-p")op=(v[i+1]=="cost");
             }
             TM.query_tickets(s,t,date,op);
@@ -143,7 +143,7 @@ int main(){
             for(int i=2;i<v.size();i+=2){
                 if(v[i]=="-s")s=v[i+1];
                 else if(v[i]=="-t")t=v[i+1];
-                else if(v[i]=="-d")date=str_to_int(v[i+1]);
+                else if(v[i]=="-d")date=str_to_date(v[i+1]);
                 else if(v[i]=="-p")op=(v[i+1]=="cost");
             }
             TM.query_transfer(s,t,date,op);
@@ -158,7 +158,7 @@ int main(){
             for(int i=2;i<v.size();i+=2){
                 if(v[i]=="-u")username=v[i+1];
                 else if(v[i]=="-i")trainID=v[i+1];
-                else if(v[i]=="-d")date=str_to_int(v[i+1]);
+                else if(v[i]=="-d")date=str_to_date(v[i+1]);
                 else if(v[i]=="-n")num=str_to_int(v[i+1]);
                 else if(v[i]=="-f")from=v[i+1];
                 else if(v[i]=="-t")to=v[i+1];
@@ -189,8 +189,21 @@ int main(){
         }
         else if(v[1]=="exit"){
             cout<<"bye"<<endl;
-            exit(0);
+            return 0;
         }
+/*        if(v[1]=="buy_ticket"||v[1]=="refund_ticket"){
+            string st="LeavesofGrass";
+            if(bpt4.find(st).size()){
+                int id=bpt4.find(st)[0];
+                Tickets tickets;
+                mem1.readorder(tickets,id);
+                Train train=tickets.train;
+                std::cerr<<v[0]<<" ";
+                for(int i=0;i<train.stationNum-1;i++)std::cerr<<tickets.seat[0][i]<<" ";
+                std::cerr<<endl;
+            }
+        }*/
+       if(v[0]=="[750566]")return 0;
     }
     return 0;
 }
