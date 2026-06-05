@@ -72,6 +72,124 @@ int main(){
             }
             UM.modify_profile(cur,username,s);
         }
+        else if(v[1]=="add_train"){
+            TrainID trainID;
+            int stationNum,seatNum;
+            string stations;
+            string prices;
+            Time startTime;
+            string travelTimes;
+            string stopoverTimes;
+            Date sales,salet;
+            char type;
+            for(int i=2;i<v.size();i+=2){
+                if(v[i]=="-i")trainID=v[i+1];
+                else if(v[i]=="-n")stationNum=str_to_int(v[i+1]);
+                else if(v[i]=="-m")seatNum=str_to_int(v[i+1]);
+                else if(v[i]=="-s")stations=v[i+1];
+                else if(v[i]=="-p")prices=v[i+1];
+                else if(v[i]=="-x")startTime=str_to_time(v[i+1]);
+                else if(v[i]=="-t")travelTimes=v[i+1];
+                else if(v[i]=="-o")stopoverTimes=v[i+1];
+                else if(v[i]=="-d"){
+                    string s="",t="";
+                    int p=0;
+                    for(int j=0;j<v[i+1].size();j++)if(v[i+1][j]=='|'){p=j+1;break;}else s+=v[i+1][j];
+                    for(int j=p;j<v[i+1].size();j++)t+=v[i+1][j];
+                    sales=str_to_date(s),salet=str_to_date(t);
+                }
+                else if(v[i]=="-y")type=v[i+1][0];
+            }
+            TM.add_train(trainID,stationNum,seatNum,stations,prices,startTime,travelTimes,stopoverTimes,sales,salet,type);
+        }
+        else if(v[1]=="delete_train"){
+            TrainID trainID;
+            for(int i=2;i<v.size();i+=2)
+                if(v[i]=="-i")trainID=v[i+1];
+            TM.delete_train(trainID);
+        }
+        else if(v[1]=="release_train"){
+            TrainID trainID;
+            for(int i=2;i<v.size();i+=2)
+                if(v[i]=="-i")trainID=v[i+1];
+            TM.release_train(trainID);
+        }
+        else if(v[1]=="query_train"){
+            TrainID trainID;
+            Date date;
+            for(int i=2;i<v.size();i+=2){
+                if(v[i]=="-i")trainID=v[i+1];
+                else if(v[i]=="-d")date=str_to_date(v[i+1]);
+            }
+            TM.query_train(trainID,date);
+        }
+        else if(v[1]=="query_ticket"){
+            Station s,t;
+            Date date;
+            bool op;
+            for(int i=2;i<v.size();i+=2){
+                if(v[i]=="-s")s=v[i+1];
+                else if(v[i]=="-t")t=v[i+1];
+                else if(v[i]=="-d")date=str_to_int(v[i+1]);
+                else if(v[i]=="-p")op=(v[i+1]=="cost");
+            }
+            TM.query_tickets(s,t,date,op);
+        }
+        else if(v[1]=="query_transfer"){
+            Station s,t;
+            Date date;
+            bool op=0;
+            for(int i=2;i<v.size();i+=2){
+                if(v[i]=="-s")s=v[i+1];
+                else if(v[i]=="-t")t=v[i+1];
+                else if(v[i]=="-d")date=str_to_int(v[i+1]);
+                else if(v[i]=="-p")op=(v[i+1]=="cost");
+            }
+            TM.query_transfer(s,t,date,op);
+        }
+        else if(v[1]=="buy_ticket"){
+            Username username;
+            TrainID trainID;
+            Date date;
+            int num;
+            Station from,to;
+            bool op=0;
+            for(int i=2;i<v.size();i+=2){
+                if(v[i]=="-u")username=v[i+1];
+                else if(v[i]=="-i")trainID=v[i+1];
+                else if(v[i]=="-d")date=str_to_int(v[i+1]);
+                else if(v[i]=="-n")num=str_to_int(v[i+1]);
+                else if(v[i]=="-f")from=v[i+1];
+                else if(v[i]=="-t")to=v[i+1];
+                else if(v[i]=="-q")op=(v[i+1]=="true");
+            }
+            OM.buy_ticket(username,trainID,date,num,from,to,op);
+        }
+        else if(v[1]=="query_order"){
+            Username username;
+            for(int i=2;i<v.size();i+=2)
+                if(v[i]=="-u")username=v[i+1];
+            OM.query_order(username);
+        }
+        else if(v[1]=="refund_ticket"){
+            Username username;
+            int num=1;
+            for(int i=2;i<v.size();i+=2){
+                if(v[i]=="-u")username=v[i+1];
+                else if(v[i]=="-n")num=str_to_int(v[i+1]);
+            }
+            OM.refund_ticket(username,num);
+        }
+        else if(v[1]=="clean"){
+            UM.clear();
+            TM.clear();
+            UM.clear();
+            cout<<0<<endl;
+        }
+        else if(v[1]=="exit"){
+            cout<<"bye"<<endl;
+            exit(0);
+        }
     }
     return 0;
 }
