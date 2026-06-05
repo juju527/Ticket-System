@@ -203,7 +203,6 @@ int main(){
                 std::cerr<<endl;
             }
         }*/
-       if(v[0]=="[750566]")return 0;
     }
     return 0;
 }

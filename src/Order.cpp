@@ -43,7 +43,7 @@ void OrderManager::buy_ticket(Username username, TrainID trainID, Date date, int
             od.arrivingDate=td+p;od.arrivingTime=tt;
         }
     }
-    if(l==-1||r==-1||l>r){cout<<-1<<endl;return ;}
+    if(l==-1||r==-1||l>r||num>train.seatNum){cout<<-1<<endl;return ;}
 //    std::cerr<<l<<" "<<r<<endl;
     int seat=1e9;
     for(int i=l;i<r;i++)seat=std::min(seat,tickets.seat[p][i]);
