@@ -88,7 +88,8 @@ class BPT {
     }
 
     void clear(){
-        root=0,D=0;
+        root=0,tot=0,D=0;
+        bpt.clear();
         return ;
     }
 

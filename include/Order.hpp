@@ -14,14 +14,12 @@ public:
     Status status;
     TrainID trainID;
     Station s,t;
+    int l,r;
     Date d0;// 偏移量
     Date leavingDate, arrivingDate;
     Time leavingTime, arrivingTime;
     int price;
     int num;
-    Order(Status, TrainID, Station, Station, Date, Date, Time, Date, Time, int, int);
-    bool operator <(const Order&)const;
-    bool operator ==(const Order&)const;
 };
 
 class OrderManager{

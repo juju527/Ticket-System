@@ -18,8 +18,8 @@ int main(){
     std::ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
     std::cout.tie(nullptr);
-    mem1.initialise("tickets");
-    mem2.initialise("order");
+    mem1.initialise("tickets");mem1.open();
+    mem2.initialise("order");mem2.open();
     UserManager UM(&bpt1,&bpt2);
     TrainManager TM(&bpt3,&mem1,&bpt4,&bpt5,&bpt6,&bpt);
     OrderManager OM(&bpt2,&mem1,&bpt4,&mem2,&bpt8,&bpt9);
@@ -27,6 +27,7 @@ int main(){
         string s;
         getline(cin,s);
         vector<string> v=Parse(s);
+        cout<<v[0]<<" ";
         if(v[1]=="add_user"){
             Username cur,username;
             Password password;

@@ -87,6 +87,7 @@ TrainManager::TrainManager(BPT<TrainID,Train,50> *bpt3,MemoryRiver<Tickets,1> *m
 }
 void TrainManager::clear(){
     this->bpt3->clear();
+    this->mem1->clear();
     this->bpt4->clear();
     this->bpt5->clear();
     this->bpt6->clear();
