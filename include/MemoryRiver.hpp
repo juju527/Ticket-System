@@ -43,9 +43,9 @@ template <class T, int info_len = 2> class MemoryRiver {
         file.close();
         return;
     }
-    void clear(){
+    void clear() {
         file.close();
-        file.open(file_name ,std::ios::out | std::ios::trunc);
+        file.open(file_name, std::ios::out | std::ios::trunc);
         file.close();
         open();
         int tmp = 0;
@@ -53,7 +53,7 @@ template <class T, int info_len = 2> class MemoryRiver {
             file.seekp(i * sizeof(int), std::ios::beg);
             file.write(reinterpret_cast<char *>(&tmp), sizeof(int));
         }
-        return ;
+        return;
     }
 
     void get_info(int &tmp, int n) {

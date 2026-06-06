@@ -1,15 +1,16 @@
 #ifndef BPT_HPP
 #define BPT_HPP
+#include "vector.hpp"
 #include <cmath>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "vector.hpp"
 
-#include"MemoryRiver.hpp"
+#include "MemoryRiver.hpp"
 
+using sjtu::vector;
 using std::cin;
 using std::cout;
 using std::endl;
@@ -17,7 +18,6 @@ using std::fstream;
 using std::ifstream;
 using std::ofstream;
 using std::string;
-using sjtu::vector;
 
 template <class Key, class Val, int M> // 至多 M-1 个儿子
 class BPT {
@@ -25,7 +25,7 @@ class BPT {
     struct info {
         Key key;
         Val val;
-        info()=default;
+        info() = default;
         info(Key _key, Val _val) : key(_key), val(_val) {}
         info &operator=(const info &other) {
             key = other.key;
@@ -87,13 +87,13 @@ class BPT {
         bpt.close();
     }
 
-    void clear(){
-        root=0,tot=0,D=0;
+    void clear() {
+        root = 0, tot = 0, D = 0;
         bpt.clear();
-        return ;
+        return;
     }
 
-    bool empty(){return root==0;}
+    bool empty() { return root == 0; }
 
   private:
     void _insert(int d, int y, info &w) {
@@ -356,7 +356,8 @@ class BPT {
 
     vector<Val> find(Key key) {
         vector<Val> res;
-        if (!root)return res;
+        if (!root)
+            return res;
         node cur;
         bpt.readorder(cur, root);
         int tmp = root;
